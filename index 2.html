@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Ödeme Takibi">
+    <meta name="theme-color" content="#ffffff">
+    <title>Sporcu Ödeme Takibi</title>
+    <style>
+    :root {
+        --bg:   #ffffff;
+        --srf:  #ffffff;
+        --bd:   #e2e8f0;
+        --bd2:  #cbd5e1;
+        --txt:  #0f172a;
+        --txt2: #475569;
+        --txt3: #94a3b8;
+
+        --pri:  #2563eb; --pri-bg: #eff6ff; --pri-bd: #bfdbfe;
+        --grn:  #16a34a; --grn-bg: #f0fdf4; --grn-bd: #86efac;
+        --red:  #dc2626; --red-bg: #fef2f2; --red-bd: #fca5a5;
+        --tel:  #0d9488; --tel-bg: #f0fdfa; --tel-bd: #5eead4;
+        --amb:  #d97706; --amb-bg: #fffbeb; --amb-bd: #fde68a;
+
+        --hdr-h: 70px;
+        --ext-h: 85px;
+        --bar-h: 80px;
+        --sat: env(safe-area-inset-top,0px);
+        --sab: env(safe-area-inset-bottom,0px);
+        --sal: env(safe-area-inset-left,0px);
+        --sar: env(safe-area-inset-right,0px);
+        --ad-offset: 0px;
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{background:#fff;-webkit-text-size-adjust:100%}
+    body{
+        font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;
+        background:#fff;color:var(--txt);
+        min-height:100dvh;
+        padding-top:var(--sat);
+        overflow:hidden;
+    }
+
+    /* ── HEADER ── */
+    .hdr{
+        background:#fff;
+        border-bottom:1px solid var(--bd);
+        box-shadow:0 1px 4px rgba(0,0,0,.07);
+    }
+    .hdr-top{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:10px 14px 10px;gap:8px;
+    }
+    .brand{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+    .brand-ico{
+        width:34px;height:34px;flex-shrink:0;
+        background:linear-gradient(135deg,#0d9488,#0891b2);
+        border-radius:10px;
+        display:flex;align-items:center;justify-content:center;font-size:1rem;
+        box-shadow:0 2px 7px rgba(13,148,136,.28);
+    }
+    .brand h1{font-size:.93rem;font-weight:800;letter-spacing:-.02em;color:var(--txt)}
+    .brand p{font-size:.6rem;color:var(--txt3);margin-top:1px}
+
+    .hdr-controls{display:flex;align-items:center;gap:6px;flex-shrink:0}
+
+    .mctr{
+        display:flex;align-items:center;gap:1px;
+        background:#f1f5f9;border:1px solid var(--bd);border-radius:20px;padding:2px 6px;
+    }
+    .mctr button{
+        background:none;border:none;color:var(--txt2);cursor:pointer;
+        font-size:1rem;width:26px;height:26px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+    }
+    .mctr button:active{background:var(--bd)}
+    .mctr span{font-size:.7rem;font-weight:800;min-width:80px;text-align:center;color:var(--txt)}
+
+    .btn-help{
+        background:#f1f5f9;border:1px solid var(--bd);color:var(--txt2);
+        cursor:pointer;width:32px;height:32px;border-radius:50%;
+        display:flex;align-items:center;justify-content:center;
+        font-size:.78rem;font-weight:800;
+    }
+    .btn-help:active{background:var(--bd)}
+
+    /* ── STATS ── */
+    #extras{background:#fff}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:8px 10px 0}
+    .sc{
+        background:#f8fafc;border:1px solid var(--bd);
+        border-radius:10px;padding:7px 8px;
+        box-shadow:0 1px 2px rgba(0,0,0,.04);
+    }
+    .sc-lbl{font-size:.48rem;color:var(--txt3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+    .sc-val{font-size:1.2rem;font-weight:900;margin-top:2px}
+    .grp-lbl{padding:7px 12px 3px;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3)}
+
+    /* ── TABLE WRAPPER ── */
+    .tbl-wrap{
+        overflow-x:hidden;
+        overflow-y:auto;
+        -webkit-overflow-scrolling:touch;
+        height:calc(100dvh - var(--sat) - var(--hdr-h) - var(--ext-h) - var(--bar-h) - var(--ad-offset));
+        min-height:140px;
+        border-top:1px solid var(--bd);
+        background:#fff;
+    }
+
+    table{
+        border-collapse:collapse;
+        table-layout:fixed;
+        width:100%;
+    }
+
+    /* Sütun genişlikleri: İsim 75% | Ödeme 18% | Sil 7% */
+    .cn{width:75%}
+    .cp{width:18%}
+    .cx{width:7%}
+
+    thead th{
+        position:sticky;top:0;z-index:22;
+        background:#f8fafc;
+        padding:5px 2px;
+        font-size:.53rem;font-weight:800;
+        text-transform:uppercase;letter-spacing:.04em;
+        color:var(--txt2);text-align:center;
+        white-space:nowrap;overflow:hidden;
+        border-bottom:1.5px solid var(--bd2);
+    }
+    thead th.cn-th{text-align:left;padding-left:10px}
+
+    tbody tr{background:#fff}
+    tbody tr:nth-child(even){background:#fafbfc}
+    tbody tr:active{background:#eff6ff}
+
+    tbody td{
+        padding:4px 2px;text-align:center;vertical-align:middle;
+        overflow:hidden;white-space:nowrap;
+        border-bottom:1px solid #f1f5f9;
+    }
+    tbody td.td-name{text-align:left;padding-left:10px}
+
+    .nm{
+        font-weight:700;font-size:.78rem;
+        overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+        display:block;color:var(--txt);
+    }
+
+    /* ── ÖDEME ── */
+    .pay{
+        font-size:.6rem;font-weight:800;
+        border-radius:8px;padding:3px 5px;
+        border:1.5px solid var(--bd2);background:#f8fafc;color:var(--txt3);
+        cursor:pointer;font-family:inherit;white-space:nowrap;
+        transition:transform .1s;display:inline-block;
+        max-width:100%;overflow:hidden;text-overflow:ellipsis;
+    }
+    .pay:active{transform:scale(.9)}
+    .pay.p1{background:var(--tel-bg);border-color:var(--tel-bd);color:var(--tel)}
+    .pay.p2{background:var(--amb-bg);border-color:var(--amb-bd);color:var(--amb)}
+
+    /* ── SİL ── */
+    .bd{
+        background:none;border:none;color:var(--txt3);cursor:pointer;
+        font-size:.65rem;width:24px;height:24px;border-radius:50%;
+        display:inline-flex;align-items:center;justify-content:center;
+        transition:background .15s,color .15s;
+    }
+    .bd:active{background:var(--red-bg);color:var(--red)}
+
+    /* ── BOŞ DURUM ── */
+    .empty{text-align:center;padding:3rem 1.5rem;color:var(--txt3)}
+    .empty span{font-size:3rem;opacity:.4;display:block;margin-bottom:.75rem}
+    .empty p{font-size:.85rem;line-height:1.75;color:var(--txt2)}
+
+    /* ── ALT BAR ── */
+    .add-bar{
+        position:fixed;bottom:var(--ad-offset);left:0;right:0;z-index:200;
+        background:rgba(255,255,255,.97);
+        backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+        border-top:1px solid var(--bd);
+        padding:10px calc(12px + var(--sar)) calc(10px + var(--sab)) calc(12px + var(--sal));
+        display:flex;gap:8px;align-items:center;
+        box-shadow:0 -2px 12px rgba(0,0,0,.07);
+    }
+    .add-bar input{
+        flex:1;background:#f1f5f9;border:1.5px solid var(--bd);
+        border-radius:22px;padding:10px 14px;
+        color:var(--txt);font-size:.875rem;font-family:inherit;
+        outline:none;appearance:none;-webkit-appearance:none;
+    }
+    .add-bar input:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+    .add-bar input::placeholder{color:var(--txt3)}
+    .btn-add{
+        background:linear-gradient(135deg,#0d9488,#0891b2);
+        border:none;border-radius:22px;padding:10px 18px;
+        color:#fff;font-size:.82rem;font-weight:800;
+        cursor:pointer;font-family:inherit;flex-shrink:0;
+        appearance:none;-webkit-appearance:none;
+        box-shadow:0 2px 8px rgba(13,148,136,.28);
+    }
+    .btn-add:active{opacity:.85}
+
+    /* ── MODAL ── */
+    .mbg{
+        display:none;position:fixed;inset:0;z-index:999;
+        background:rgba(15,23,42,.4);
+        backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+        align-items:flex-end;
+    }
+    .mbg.open{display:flex}
+    .modal{
+        background:#fff;border-radius:20px 20px 0 0;
+        border:1px solid var(--bd);border-bottom:none;
+        padding:20px 18px calc(24px + var(--sab));
+        width:100%;max-height:88dvh;overflow-y:auto;
+        box-shadow:0 -4px 24px rgba(0,0,0,.1);
+    }
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .modal-head h2{font-size:.95rem;font-weight:900;color:var(--txt)}
+    .mclose{
+        background:#f1f5f9;border:1px solid var(--bd);color:var(--txt2);
+        width:30px;height:30px;border-radius:50%;cursor:pointer;
+        font-size:.75rem;display:flex;align-items:center;justify-content:center;
+    }
+    .msec{margin-bottom:18px}
+    .msec h3{font-size:.65rem;font-weight:800;color:var(--pri);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+    .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:9px}
+    .snum{
+        width:21px;height:21px;border-radius:50%;flex-shrink:0;margin-top:1px;
+        background:var(--pri-bg);color:var(--pri);
+        font-size:.65rem;font-weight:900;
+        display:flex;align-items:center;justify-content:center;
+    }
+    .step p{font-size:.8rem;color:var(--txt2);line-height:1.5}
+    .step strong{color:var(--txt)}
+
+    ::-webkit-scrollbar{width:3px;height:3px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr" id="hdr">
+    <div class="hdr-top">
+        <div class="brand">
+            <div class="brand-ico">💰</div>
+            <div>
+                <h1>Sporcu Ödeme Takibi</h1>
+                <p>Aylık Ödeme Durumu</p>
+            </div>
+        </div>
+        <div class="hdr-controls">
+            <div class="mctr">
+                <button onclick="shiftM(-1)">&#8249;</button>
+                <span id="mLbl"></span>
+                <button onclick="shiftM(1)">&#8250;</button>
+            </div>
+            <button class="btn-help" onclick="openH()">?</button>
+        </div>
+    </div>
+</div>
+
+<!-- EXTRAS: istatistik -->
+<div id="extras">
+    <div class="stats">
+        <div class="sc"><div class="sc-lbl">Sporcu</div><div class="sc-val" style="color:var(--pri)" id="sT">0</div></div>
+        <div class="sc"><div class="sc-lbl">Ödendi</div><div class="sc-val" style="color:var(--tel)" id="sP">0</div></div>
+        <div class="sc"><div class="sc-lbl">Bekleyen</div><div class="sc-val" style="color:var(--amb)" id="sU">0</div></div>
+    </div>
+    <div class="grp-lbl" id="gLbl"></div>
+</div>
+
+<!-- TABLO -->
+<div class="tbl-wrap" id="tw">
+    <table>
+        <colgroup>
+            <col class="cn">
+            <col class="cp">
+            <col class="cx">
+        </colgroup>
+        <thead>
+            <tr>
+                <th class="cn-th">Ad Soyad</th>
+                <th>Ödeme</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+    </table>
+</div>
+
+<!-- ALT BAR -->
+<div class="add-bar" id="addbar">
+    <input id="inp" type="text" autocomplete="off" autocorrect="off"
+           spellcheck="false" placeholder="Sporcu adı girin…"
+           onkeydown="if(event.key==='Enter')doAdd()">
+    <button class="btn-add" onclick="doAdd()">+ Ekle</button>
+</div>
+
+<!-- YARDIM MODALI -->
+<div class="mbg" id="mbg" onclick="if(event.target===this)closeH()">
+    <div class="modal">
+        <div class="modal-head">
+            <h2>📖 Kullanım Kılavuzu</h2>
+            <button class="mclose" onclick="closeH()">✕</button>
+        </div>
+        <div class="msec">
+            <h3>📲 Safari'de Açıp Ana Ekrana Ekleme</h3>
+            <div class="step"><div class="snum">1</div>
+                <p><strong>Dosyalar</strong> uygulamasında <strong>odeme.html</strong> dosyasına uzun bas (1-2 sn)</p></div>
+            <div class="step"><div class="snum">2</div>
+                <p>Çıkan menüden <strong>Paylaş</strong> seç</p></div>
+            <div class="step"><div class="snum">3</div>
+                <p>Paylaş ekranında <strong>"Safari'de Aç"</strong> seç</p></div>
+            <div class="step"><div class="snum">4</div>
+                <p>Safari açıldıktan sonra ekranın altındaki <strong>Paylaş ⬆</strong> butonuna bas</p></div>
+            <div class="step"><div class="snum">5</div>
+                <p><strong>"Ana Ekrana Ekle"</strong> seç → sağ üstten <strong>"Ekle"</strong> ye bas</p></div>
+            <div class="step"><div class="snum">✓</div>
+                <p>Artık uygulama gibi doğrudan ana ekrandan açılır 🎉</p></div>
+        </div>
+        <div class="msec">
+            <h3>💰 Ödeme Takibi</h3>
+            <div class="step"><div class="snum">1</div>
+                <p><strong>1. dokunuş</strong> → <span style="color:var(--tel)">Ödendi</span></p></div>
+            <div class="step"><div class="snum">2</div>
+                <p><strong>2. dokunuş</strong> → <span style="color:var(--amb)">Bekliyor</span></p></div>
+            <div class="step"><div class="snum">3</div>
+                <p><strong>3. dokunuş</strong> → Temizle</p></div>
+        </div>
+        <div class="msec">
+            <h3>ℹ️ Genel Bilgi</h3>
+            <div class="step"><div class="snum">•</div>
+                <p>Sporcular <strong>Türkçe alfabetik sıraya</strong> göre dizilir</p></div>
+            <div class="step"><div class="snum">•</div>
+                <p>Sporcular <strong>bir kez eklenir</strong>, her ay otomatik görünür</p></div>
+            <div class="step"><div class="snum">•</div>
+                <p>Her ayın ödeme verileri <strong>ayrı ayrı</strong> saklanır</p></div>
+            <div class="step"><div class="snum">•</div>
+                <p>Veriler telefonun hafızasında tutulur, internet bağlantısı gerekmez</p></div>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+const MONTHS=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+              'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+const SHORT =['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const PLBL  =['Ödeme?','Ödendi','Bekliyor'];
+
+let yr=new Date().getFullYear(), mo=new Date().getMonth();
+
+const aK = () => 'od1_ath';
+const dK = id => `od1_${yr}_${mo}_${id}`;
+
+function getAths()  { return JSON.parse(localStorage.getItem(aK())||'[]'); }
+function setAths(l) { localStorage.setItem(aK(),JSON.stringify(l)); }
+function getD(id)   { return JSON.parse(localStorage.getItem(dK(id))||'{"pay":0}'); }
+function setD(id,d) { localStorage.setItem(dK(id),JSON.stringify(d)); }
+
+function trSort(list){
+    return [...list].sort((a,b)=>a.name.localeCompare(b.name,'tr',{sensitivity:'base'}));
+}
+
+function shiftM(d){
+    mo+=d; if(mo>11){mo=0;yr++;} if(mo<0){mo=11;yr--;} render();
+}
+
+function doAdd(){
+    const inp=document.getElementById('inp');
+    const nm=inp.value.trim(); if(!nm){inp.focus();return;}
+    const l=getAths(); l.push({id:Date.now(),name:nm});
+    setAths(l); inp.value=''; inp.focus(); render();
+}
+
+function cycP(id){
+    const d=getD(id); d.pay=(d.pay+1)%3; setD(id,d); render();
+}
+
+function delA(id){
+    if(!confirm('Bu sporcuyu silmek istiyor musunuz?')) return;
+    setAths(getAths().filter(a=>a.id!==id)); render();
+}
+
+function openH(){ document.getElementById('mbg').classList.add('open'); }
+function closeH(){ document.getElementById('mbg').classList.remove('open'); }
+
+function esc(s){
+    return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render(){
+    document.getElementById('mLbl').textContent = SHORT[mo]+' '+yr;
+    document.getElementById('gLbl').textContent = MONTHS[mo]+' '+yr+' Ödeme Listesi';
+
+    const aths=trSort(getAths());
+    const ds  =aths.map(a=>getD(a.id));
+    document.getElementById('sT').textContent=aths.length;
+    document.getElementById('sP').textContent=ds.filter(d=>d.pay===1).length;
+    document.getElementById('sU').textContent=ds.filter(d=>d.pay===2).length;
+
+    const tb=document.getElementById('tb');
+    if(!aths.length){
+        tb.innerHTML=`<tr><td colspan="3"><div class="empty">
+            <span>💰</span>
+            <p>Henüz sporcu eklenmedi.<br>Aşağıdan sporcu ekleyebilirsiniz.</p>
+        </div></td></tr>`;
+        return;
+    }
+
+    tb.innerHTML=aths.map(a=>{
+        const d=getD(a.id);
+        return `<tr>
+            <td class="td-name"><span class="nm" title="${esc(a.name)}">${esc(a.name)}</span></td>
+            <td><button class="pay p${d.pay}" onclick="cycP(${a.id})">${PLBL[d.pay]}</button></td>
+            <td><button class="bd" onclick="delA(${a.id})">✕</button></td>
+        </tr>`;
+    }).join('');
+}
+
+const root   = document.documentElement;
+const hdrEl  = document.getElementById('hdr');
+const extEl  = document.getElementById('extras');
+const barEl  = document.getElementById('addbar');
+const setVar = (name,el) => root.style.setProperty(name, el.offsetHeight+'px');
+
+new ResizeObserver(()=>setVar('--hdr-h',hdrEl)).observe(hdrEl);
+new ResizeObserver(()=>setVar('--ext-h',extEl)).observe(extEl);
+new ResizeObserver(()=>setVar('--bar-h',barEl)).observe(barEl);
+
+if(location.hostname.includes('tiiny')){
+    root.style.setProperty('--ad-offset','55px');
+}
+
+render();
+</script>
+</body>
+</html>
